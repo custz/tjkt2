@@ -1,0 +1,8 @@
+{
+  "name": "Portal Kelas X TJKT 2",
+  "description": "Portal web modern dan elegan untuk kelas X TJKT 2 (Teknik Jaringan Komputer dan Telekomunikasi), menampilkan direktori siswa, jadwal pelajaran, dan asisten AI.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
