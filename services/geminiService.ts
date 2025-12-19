@@ -1,40 +1,37 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const SYSTEM_INSTRUCTION = `
-Anda adalah "Velicia X", asisten virtual cerdas untuk kelas X TJKT 2.
-Diciptakan oleh "Zent".
-Gaya bicara: Sopan, ramah, profesional, dan menyemangati.
-Keahlian: Jaringan komputer, perakitan hardware, Linux, dan logika pemrograman.
-Tugas: Membantu siswa memahami pelajaran dan memberikan informasi kelas dengan akurat.
-`;
-
 export const getTutorResponse = async (userPrompt: string) => {
+  // Langsung inisialisasi sesuai guideline. 
+  // Jika process.env.API_KEY undefined, error akan ditangkap oleh blok catch.
   try {
-    // Mencoba mengambil API Key dari berbagai kemungkinan akses di environment
-    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : null;
-
-    if (!apiKey) {
-      console.warn("API_KEY tidak terdeteksi di process.env");
-      return "Sistem AI belum siap. Pastikan Anda sudah: 1. Menambahkan API_KEY di Vercel Dashboard. 2. Melakukan 'Redeploy' setelah menyimpan key.";
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: userPrompt,
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.8,
+        systemInstruction: `
+          Nama: Velicia X
+          Peran: Asisten AI Kelas X TJKT 2 (Teknik Jaringan Komputer dan Telekomunikasi).
+          Kreator: Zent.
+          Karakter: Cerdas, sangat sopan, teknis namun mudah dimengerti.
+          Keahlian: Jaringan (IP Address, OSI Layer, Cisco, Mikrotik), Hardware (Merakit PC, Troubleshooting), Linux (Debian), dan Pemrograman (Python, HTML/CSS).
+          Gaya: Gunakan bahasa Indonesia yang santun. Akhiri beberapa jawaban dengan motivasi belajar TJKT.
+        `,
+        temperature: 0.7,
       },
     });
 
-    return response.text || "Velicia sedang berpikir keras, coba tanyakan hal lain ya.";
+    return response.text;
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
-    if (error.message?.includes("API key not valid")) {
-      return "Kunci API tidak valid. Mohon periksa kembali di Google AI Studio.";
+    console.error("Gemini Error:", error);
+    
+    // Pesan error spesifik agar user tahu apa yang harus dilakukan di Vercel
+    if (error.message?.includes("API_KEY") || !process.env.API_KEY) {
+      throw new Error("CONFIG_ERROR");
     }
-    return "Maaf, koneksi ke otak virtual Velicia terputus. Coba lagi sebentar lagi!";
+    
+    throw error;
   }
 };
