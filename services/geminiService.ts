@@ -2,21 +2,21 @@
 import { GoogleGenAI } from "@google/genai";
 
 const SYSTEM_INSTRUCTION = `
-Anda adalah "Velicia X", asisten virtual yang cerdas, ramah, dan sangat sopan untuk kelas X TJKT 2 (Teknik Jaringan Komputer dan Telekomunikasi).
-Anda diciptakan oleh "Zent".
-Gunakan bahasa Indonesia yang baku namun tetap terasa akrab dan menyemangati.
-Anda memiliki keahlian mendalam dalam bidang jaringan (Cisco, Mikrotik), perangkat keras (hardware), dan perangkat lunak (software/web).
-Tugas Anda adalah membantu siswa dengan pertanyaan seputar pelajaran SMK atau informasi seputar kelas.
-Selalu tekankan bahwa X TJKT 2 adalah kelas yang luar biasa dan penuh inovasi!
-Berikan jawaban yang ringkas, jelas, dan sangat sopan.
+Anda adalah "Velicia X", asisten virtual cerdas untuk kelas X TJKT 2.
+Diciptakan oleh "Zent".
+Gaya bicara: Sopan, ramah, profesional, dan menyemangati.
+Keahlian: Jaringan komputer, perakitan hardware, Linux, dan logika pemrograman.
+Tugas: Membantu siswa memahami pelajaran dan memberikan informasi kelas dengan akurat.
 `;
 
 export const getTutorResponse = async (userPrompt: string) => {
-  // Selalu buat instance baru saat dipanggil untuk memastikan API Key terbaru dari env terambil
   try {
-    const apiKey = process.env.API_KEY;
+    // Mencoba mengambil API Key dari berbagai kemungkinan akses di environment
+    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : null;
+
     if (!apiKey) {
-      return "Sistem AI (Velicia X) belum terkonfigurasi. Silakan tambahkan API_KEY di pengaturan dashboard (Vercel/Hosting).";
+      console.warn("API_KEY tidak terdeteksi di process.env");
+      return "Sistem AI belum siap. Pastikan Anda sudah: 1. Menambahkan API_KEY di Vercel Dashboard. 2. Melakukan 'Redeploy' setelah menyimpan key.";
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -25,16 +25,16 @@ export const getTutorResponse = async (userPrompt: string) => {
       contents: userPrompt,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.7,
+        temperature: 0.8,
       },
     });
 
-    return response.text || "Mohon maaf, saya sedang mengalami kendala dalam memproses jawaban.";
+    return response.text || "Velicia sedang berpikir keras, coba tanyakan hal lain ya.";
   } catch (error: any) {
     console.error("Gemini API Error:", error);
     if (error.message?.includes("API key not valid")) {
-      return "API Key Gemini tidak valid. Harap periksa kembali konfigurasi Anda.";
+      return "Kunci API tidak valid. Mohon periksa kembali di Google AI Studio.";
     }
-    return "Terjadi gangguan koneksi ke pusat data Velicia X. Silakan coba lagi nanti.";
+    return "Maaf, koneksi ke otak virtual Velicia terputus. Coba lagi sebentar lagi!";
   }
 };
